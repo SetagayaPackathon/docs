@@ -13,4 +13,4 @@ csv.each do |row|
   })
 end
 
-puts data.to_json
+puts 'var questions_data = ' + JSON.pretty_generate(data) + ';'
