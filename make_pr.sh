@@ -80,11 +80,11 @@ if [ -z "`git config --get --global credential.helper`" ]; then
 fi
 if [ -z "`git config --get --global user.email`" ]; then
 	notice "set up user.email"
-	git config --global user.email "contact@travis-ci.com"
+	git config --global user.email "yandod@gmail.com"
 fi
 if [ -z "`git config --get --global user.name`" ]; then
 	notice "set up user.name"
-	git config --global user.name "Travis CI APT package tester"
+	git config --global user.name "Packathon build bot"
 fi
 
 notice "Creating commit"
