@@ -90,3 +90,4 @@ var questions_data = [
     "answer": "8歳以上（人間の32歳）"
   }
 ];
+if (set_questions) { set_questions(questions_data);}
