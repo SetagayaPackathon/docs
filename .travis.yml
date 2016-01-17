@@ -1,6 +1,12 @@
 language: ruby
+
 rvm:
   - 2.1
+
+branches:
+  only:
+    - gh-pages
+
 script:
   - ./convert.rb > quiz.js
   - bash ./commit_new_csv.sh
