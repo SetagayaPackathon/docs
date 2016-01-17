@@ -45,7 +45,7 @@ fi
 
 notice "Creating commit"
 #git checkout $DEFAULT_BRANCH
-git checkout -b $BRANCH
+#git checkout -b $BRANCH
 
 git add ${TARGET_FILE}
 git commit -m "convert to csv by bots. [ci skip]"
