@@ -1,0 +1,5 @@
+language: ruby
+
+script:
+  - ./convert.rb > quiz.js
+  - bash -n ./make_pr.sh
