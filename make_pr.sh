@@ -10,10 +10,7 @@ EXIT_SOURCE_NOT_FOUND=1
 EXIT_SOURCE_HAS_SETUID=2
 EXIT_NOTHING_TO_COMMIT=3
 
-BRANCH=travis
-
-create_pr=0
-has_setuid=0
+BRANCH=${TRAVIS_BRANCH}
 
 TARGET_FILE=quiz.js
 
@@ -45,7 +42,7 @@ fi
 
 notice "Creating commit"
 #git checkout $DEFAULT_BRANCH
-#git checkout -b $BRANCH
+git checkout $BRANCH
 
 git add ${TARGET_FILE}
 git commit -m "convert to csv by bots. [ci skip]"
