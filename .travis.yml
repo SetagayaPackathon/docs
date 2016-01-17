@@ -3,6 +3,4 @@ rvm:
   - 2.1
 script:
   - ./convert.rb > quiz.js
-  - cat ./quiz.js
-  - git status
-  - bash ./make_pr.sh
+  - bash ./commit_new_csv.sh
