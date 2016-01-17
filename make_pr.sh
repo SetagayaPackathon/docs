@@ -10,10 +10,12 @@ EXIT_SOURCE_NOT_FOUND=1
 EXIT_SOURCE_HAS_SETUID=2
 EXIT_NOTHING_TO_COMMIT=3
 
-DEFAULT_BRANCH=gh-pages
+BRANCH=travis
 
 create_pr=0
 has_setuid=0
+
+TARGET_FILE=quiz.js
 
 function notice() {
 	msg=$1
@@ -25,52 +27,6 @@ function warn() {
 	echo -e "\n${ANSI_RED}${msg}${ANSI_RESET}\n"
 }
 
-function usage() {
-	echo "Usage: $0 [-y] repo issue_number [package [additional_packages …]]"
-}
-
-while getopts "sy" opt; do
-	case "$opt" in
-	s)
-		has_setuid=1
-		;;
-	y)
-		create_pr=1
-		;;
-	esac
-done
-
-shift $((OPTIND-1))
-
-if [ $# -lt 2 ]; then
-	usage
-	exit 0
-fi
-
-## Process arguments; nothing funcy
-
-ISSUE_REPO=$1
-shift
-ISSUE_NUMBER=$1
-shift
-
-PACKAGES=( $@ )
-if [ -z "$PACKAGES"  ]; then
-	if [ -f $(dirname $0)/packages ]; then
-		notice "Reading from $(dirname $0)/packages"
-		PACKAGES=$(< $(dirname $0)/packages)
-	else
-		warn "Unable to determine packages to add"
-		usage
-		exit 1
-	fi
-fi
-
-ISSUE_PACKAGE=$(echo $PACKAGES | cut -f1 -d' ')
-
-notice "Setting up PR with\nRepo: ${ISSUE_REPO}\nNUMBER: ${ISSUE_NUMBER}\nPackages: ${PACKAGES[*]}"
-
-BRANCH="test-${ISSUE_REPO}-${ISSUE_NUMBER}"
 notice "Setting up Git"
 
 if [ -z "`git config --get --global credential.helper`" ]; then
@@ -88,16 +44,11 @@ if [ -z "`git config --get --global user.name`" ]; then
 fi
 
 notice "Creating commit"
-git checkout $DEFAULT_BRANCH
-git checkout -b $BRANCH
-for p in ${PACKAGES[*]}; do
-	notice "Adding ${p}"
-	env PACKAGE=${p} make add > /dev/null
-done
-git add ubuntu-precise
-git commit -m "Add ${ISSUE_PACKAGE} to ubuntu-precise; resolves travis-ci/${ISSUE_REPO}#${ISSUE_NUMBER}
+#git checkout $DEFAULT_BRANCH
+#git checkout -b $BRANCH
 
-Packages: ${PACKAGES}"
+git add ${TARGET_FILE}
+git commit -m "convert to csv by bots. [ci skip]"
 
 COMMIT_EXIT_STATUS=$?
 if [ $COMMIT_EXIT_STATUS -gt 0 ]; then
@@ -112,31 +63,3 @@ if [ -z $GITHUB_OAUTH_TOKEN ]; then
 	exit 1
 fi
 git push origin $BRANCH
-
-if [ $create_pr -le 0 ]; then
-	# bail before creating a pr
-	exit 0
-fi
-
-notice "Creating PR"
-COMMENT="Add packages: ${PACKAGES[*]}"
-if [ -n ${TRAVIS_BUILD_ID} ]; then
-	COMMENT="${COMMENT}\n\nSee http://travis-ci.org/${TRAVIS_REPO_SLUG}/builds/${TRAVIS_BUILD_ID}."
-fi
-if [ ${has_setuid} -gt 0 ]; then
-	COMMENT="\n\n***NOTE***\n\nsetuid/seteuid/setgid bits were found. Be sure to check the build result.\n\n${COMMENT}"
-fi
-curl -X POST -sS -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_OAUTH_TOKEN}" \
-	-d "{\"title\":\"Pull request for ${ISSUE_PACKAGE}\",\"body\":\"Resolves travis-ci/${ISSUE_REPO}#${ISSUE_NUMBER}.\n${COMMENT}\",\"head\":\"${BRANCH}\",\"base\":\"master\"}" \
-	https://api.github.com/repos/travis-ci/apt-package-whitelist/pulls > pr_payload
-if [ $? -eq 0 -a ${has_setuid} -gt 0 ]; then
-	curl -X POST -sS -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_OAUTH_TOKEN}" \
-		-d "[\"textual-suid-present\"]" \
-		$(jq .issue_url pr_payload | cut -f2 -d\")/labels
-fi
-curl -X POST -sS -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_OAUTH_TOKEN}" \
-	-d "[\"apt-whitelist-check-run\"]" \
-	https://api.github.com/repos/travis-ci/${ISSUE_REPO}/issues/${ISSUE_NUMBER}/labels
-
-git checkout $DEFAULT_BRANCH
-git branch -D $BRANCH
