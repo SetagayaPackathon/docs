@@ -4,4 +4,5 @@ rvm:
 script:
   - ./convert.rb > quiz.js
   - cat ./quiz.js
+  - git status
   - bash -n ./make_pr.sh
