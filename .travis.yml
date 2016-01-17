@@ -5,4 +5,4 @@ script:
   - ./convert.rb > quiz.js
   - cat ./quiz.js
   - git status
-  - bash -n ./make_pr.sh
+  - bash ./make_pr.sh
