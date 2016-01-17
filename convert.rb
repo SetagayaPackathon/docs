@@ -14,3 +14,4 @@ csv.each do |row|
 end
 
 puts 'var questions_data = ' + JSON.pretty_generate(data) + ';'
+puts 'if (set_questions) { set_questions(questions_data);}';
