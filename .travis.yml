@@ -1,0 +1,6 @@
+language: ruby
+rvm:
+  - 2.1
+script:
+  - ./convert.rb > quiz.js
+  - bash ./commit_new_csv.sh
